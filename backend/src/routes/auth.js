@@ -94,7 +94,11 @@ authRouter.post("/login", async (req, res) => {
             const token = user.getJWT();
 
             //* adding the token to cookie and send back to user
-            res.cookie("token", token);
+            res.cookie("token", token, {
+                httpOnly: true,
+                secure: true,      // ⚠️ use false in local dev
+                sameSite: "none",  // required for cross-origin
+            });
             res
                 .status(200)
                 .json({ succuss: true, message: "Logged successfully", user });
