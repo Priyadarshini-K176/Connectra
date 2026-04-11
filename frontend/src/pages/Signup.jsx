@@ -94,7 +94,7 @@ const Signup = () => {
       const data = { email, firstName, lastName, username, password };
 
       const res = await axios.post(
-        import.meta.env.VITE_BackendURL+ "/signup",
+        import.meta.env.VITE_BackendURL + "/signup",
         data,
         { withCredentials: true }
       );
@@ -130,115 +130,115 @@ const Signup = () => {
   };
 
   return (
-  <div className="flex min-h-screen items-center justify-center bg-gray-50">
-    <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-lg">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-lg">
 
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-800">
-          Create your account
-        </h1>
-        <p className="mt-1 text-sm text-gray-500">
-          Start building and connecting 🚀
-        </p>
-      </div>
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-gray-800">
+            Create your account
+          </h1>
+          <p className="mt-1 text-sm text-gray-500">
+            Start building and connecting
+          </p>
+        </div>
 
-      <div className="mt-6 space-y-3">
+        <div className="mt-6 space-y-3">
 
-        {/* First Name */}
-        {errors.firstName && (
-          <p className="text-xs text-red-500">{errors.firstName}</p>
-        )}
-        <input
-          type="text"
-          placeholder="First Name"
-          className="w-full rounded-lg border px-4 py-3 focus:border-indigo-400 focus:outline-none"
-          value={firstName}
-          onChange={(e) => setFirstName(e.target.value)}
-        />
-
-        {/* Last Name */}
-        {errors.lastName && (
-          <p className="text-xs text-red-500">{errors.lastName}</p>
-        )}
-        <input
-          type="text"
-          placeholder="Last Name"
-          className="w-full rounded-lg border px-4 py-3 focus:border-indigo-400 focus:outline-none"
-          value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
-        />
-
-        {/* Username */}
-        {errors.username && (
-          <p className="text-xs text-red-500">{errors.username}</p>
-        )}
-        <input
-          type="text"
-          placeholder="Username"
-          className="w-full rounded-lg border px-4 py-3 focus:border-indigo-400 focus:outline-none"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-
-        {/* Email */}
-        {errors.email && (
-          <p className="text-xs text-red-500">{errors.email}</p>
-        )}
-        <input
-          type="email"
-          placeholder="Email"
-          className="w-full rounded-lg border px-4 py-3 focus:border-indigo-400 focus:outline-none"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-
-        {/* Password */}
-        {errors.password && (
-          <p className="text-xs text-red-500">{errors.password}</p>
-        )}
-        <div className="flex items-center rounded-lg border px-3">
+          {/* First Name */}
+          {errors.firstName && (
+            <p className="text-xs text-red-500">{errors.firstName}</p>
+          )}
           <input
-            type={showPassword ? "text" : "password"}
-            placeholder="Password"
-            className="w-full py-3 outline-none"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            type="text"
+            placeholder="First Name"
+            className="w-full rounded-lg border px-4 py-3 focus:border-indigo-400 focus:outline-none"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
           />
+
+          {/* Last Name */}
+          {errors.lastName && (
+            <p className="text-xs text-red-500">{errors.lastName}</p>
+          )}
+          <input
+            type="text"
+            placeholder="Last Name"
+            className="w-full rounded-lg border px-4 py-3 focus:border-indigo-400 focus:outline-none"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+          />
+
+          {/* Username */}
+          {errors.username && (
+            <p className="text-xs text-red-500">{errors.username}</p>
+          )}
+          <input
+            type="text"
+            placeholder="Username"
+            className="w-full rounded-lg border px-4 py-3 focus:border-indigo-400 focus:outline-none"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+
+          {/* Email */}
+          {errors.email && (
+            <p className="text-xs text-red-500">{errors.email}</p>
+          )}
+          <input
+            type="email"
+            placeholder="Email"
+            className="w-full rounded-lg border px-4 py-3 focus:border-indigo-400 focus:outline-none"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+
+          {/* Password */}
+          {errors.password && (
+            <p className="text-xs text-red-500">{errors.password}</p>
+          )}
+          <div className="flex items-center rounded-lg border px-3">
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="Password"
+              className="w-full py-3 outline-none"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="text-gray-500"
+            >
+              {showPassword ? <Eye /> : <EyeOff />}
+            </button>
+          </div>
+
+          {/* Button */}
           <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="text-gray-500"
+            onClick={handleSignUp}
+            className="mt-3 w-full rounded-lg bg-indigo-600 py-3 font-semibold text-white transition hover:bg-indigo-700"
           >
-            {showPassword ? <Eye /> : <EyeOff />}
+            Create Account
           </button>
         </div>
 
-        {/* Button */}
-        <button
-          onClick={handleSignUp}
-          className="mt-3 w-full rounded-lg bg-indigo-600 py-3 font-semibold text-white transition hover:bg-indigo-700"
-        >
-          Create Account
-        </button>
+        {/* Footer */}
+        <p className="mt-5 text-center text-xs text-gray-500">
+          By signing up, you agree to our{" "}
+          <span className="underline cursor-pointer">Terms</span> and{" "}
+          <span className="underline cursor-pointer">Privacy Policy</span>
+        </p>
+
+        <p className="mt-4 text-center text-sm text-gray-600">
+          Already have an account?{" "}
+          <a href="/login" className="font-medium text-indigo-600 hover:underline">
+            Login
+          </a>
+        </p>
+
       </div>
-
-      {/* Footer */}
-      <p className="mt-5 text-center text-xs text-gray-500">
-        By signing up, you agree to our{" "}
-        <span className="underline cursor-pointer">Terms</span> and{" "}
-        <span className="underline cursor-pointer">Privacy Policy</span>
-      </p>
-
-      <p className="mt-4 text-center text-sm text-gray-600">
-        Already have an account?{" "}
-        <a href="/login" className="font-medium text-indigo-600 hover:underline">
-          Login
-        </a>
-      </p>
-
     </div>
-  </div>
-);
+  );
 };
 
 export default Signup;

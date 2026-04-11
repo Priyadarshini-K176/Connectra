@@ -58,20 +58,46 @@ const MotionCard = ({ user, index, totalCards, requestRef }) => {
 
   return (
     <motion.div
-      drag="x"
+      drag={index === 0 ? "x" : false} // Only top card is draggable
       dragConstraints={{ left: -200, right: 200 }}
-      style={{ gridRow: 1, gridColumn: 1, x, y, opacity: combinedOpacity, rotate, zIndex: totalCards - index, pointerEvents: index === 0 ? "auto" : "none" }}
-      // IMPROVED: Added a slight vertical offset and scale for the stack look
-      animate={{ 
-        scale: index === 0 ? 1 : 1 - (index * 0.04), 
-        y: index * 12,
-        filter: index === 0 ? "blur(0px)" : `blur(${index * 1}px)`
+      style={{ 
+        gridRow: 1, 
+        gridColumn: 1, 
+        x, 
+        y, 
+        opacity: combinedOpacity, 
+        rotate, 
+        zIndex: totalCards - index, 
+        pointerEvents: index === 0 ? "auto" : "none" 
+      }}
+      // --- MODIFIED CSS FOR STACKED LOOK ---
+     animate={{
+  scale: index === 0 ? 1 : 0.92,
+
+  // 👇 THIS creates left & right peek
+  x: index === 0 ? 0 : index % 2 === 0 ? -40 : 40,
+
+  // small vertical stacking
+  y: index * -10,
+
+  // slight rotation for realism
+  rotate: index === 0 ? 0 : index % 2 === 0 ? -6 : 6,
+
+  // show only few cards
+  opacity: index > 4 ? 0 : 1,
+}}
+      transition={{
+        type: "spring",
+        stiffness: 260,
+        damping: 20
       }}
       onDrag={handleDrag}
       onDragEnd={handleDragEnd}
-      className="relative cursor-grab active:cursor-grabbing"
+      // 'origin-bottom' makes them scale toward the bottom like a real deck
+      className="relative cursor-grab active:cursor-grabbing origin-center"
     >
-      <Card user={user} index={index} />
+      {/* Index 0 passed here to ensure Card's internal styles don't conflict */}
+      <Card user={user} index={0} />
       
       <motion.div style={{ scale: scaleThumbsUp }} className="absolute right-10 top-1/2 -translate-y-1/2 pointer-events-none z-50">
         <div className="bg-green-500 p-4 rounded-full shadow-2xl text-white border-4 border-white"><FaThumbsUp size={40} /></div>
@@ -112,31 +138,27 @@ const Feed = () => {
   return (
     <div className="relative min-h-[calc(100vh-4rem)] bg-slate-50 overflow-hidden flex flex-col items-center justify-center">
       
-      {/* --- ENHANCED BACKGROUND DECOR --- */}
       <div className="absolute inset-0 z-0">
-        {/* Soft Mesh Gradients */}
         <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-blue-200/40 rounded-full blur-[120px] animate-pulse" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-indigo-200/40 rounded-full blur-[120px]" />
-        {/* Subtle Grid Pattern */}
         <div className="absolute inset-0 opacity-[0.03] [background-image:linear-gradient(to_right,#808080_1px,transparent_1px),linear-gradient(to_bottom,#808080_1px,transparent_1px)] [background-size:40px_40px]"></div>
       </div>
 
       <div className="relative z-10 flex flex-col items-center w-full max-w-4xl px-4">
         {feed && feed.length > 0 ? (
           <>
-            <header className="mb-0 text-center">
-                <span className="px-4 py-1.5 bg-white border border-slate-200 rounded-full text-[10px] font-black uppercase tracking-[0.3em] text-blue-600 shadow-sm inline-block mb-3">
-                </span>
+            <header className="mb-8 mt-10 text-center">
                 <h1 className="text-2xl font-black text-slate-800 tracking-tight">Find Your Next <span className="text-blue-600">Collaborator</span></h1>
             </header>
 
-            <div className="relative grid place-items-center w-full h-[500px]">
+            {/* CONTAINER: grid stacks cards on top of each other */}
+            <div className="relative grid place-items-center w-full h-[460px]">
               {feed.map((user, index) => (
                 <MotionCard key={user._id} user={user} index={index} totalCards={feed.length} requestRef={requestRef} />
               ))}
             </div>
 
-            <footer className="mt-16 flex flex-col items-center gap-2">
+            <footer className="mt-12 flex flex-col items-center gap-2">
               <p ref={requestRef} className="text-[11px] font-black uppercase tracking-[0.4em] text-slate-400 animate-bounce">
                 Swipe
               </p>
@@ -159,7 +181,7 @@ const Feed = () => {
                   <FaCheckCircle size={32} />
                </div>
                <h2 className="text-2xl font-black text-slate-800 tracking-tight mt-6">All Caught Up!</h2>
-               <p className="text-sm text-slate-500 mt-3 font-medium px-4">There are no more developers in your area. Try refreshing or coming back later.</p>
+               <p className="text-sm text-slate-500 mt-3 font-medium px-4">There are no more developers in your area.</p>
                <button 
                 onClick={() => window.location.reload()} 
                 className="mt-8 w-full py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-blue-600 transition-all shadow-lg active:scale-95"

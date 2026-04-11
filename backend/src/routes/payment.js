@@ -61,7 +61,7 @@ paymentRoute.get("/payment/plans", userAuth, async (req, res) => {
 paymentRoute.post("/payment/createOrder", userAuth, async (req, res) => {
   try {
     const { membershipType } = req.body;
-    const { firstName, lastName } = req.user;
+    const { firstName, lastName, email } = req.user;
     const order = await razorpayInstance.orders.create({
       amount: (() => {
         const plan = PLANS.find((p) => p.membershipType === membershipType);
@@ -74,6 +74,7 @@ paymentRoute.post("/payment/createOrder", userAuth, async (req, res) => {
         // can give meta data here
         firstName,
         lastName,
+        email,
         plan: membershipType,
       },
     });
@@ -115,7 +116,7 @@ paymentRoute.post("/payment/webhook", async (req, res) => {
     );
 
     if (!isWebhookValid) {
-      return req
+      return res
         .status(400)
         .json({ success: false, error: "WebHook signature is not valid" });
     }
@@ -148,8 +149,6 @@ paymentRoute.post("/payment/webhook", async (req, res) => {
     user.membershipType = Array.isArray(membershipType)
       ? membershipType[0]
       : membershipType;
-    await user.save();
-
     await user.save();
 
     // if (req.body.event == "payment.captured") {

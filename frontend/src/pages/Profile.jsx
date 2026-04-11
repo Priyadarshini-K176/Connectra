@@ -13,7 +13,7 @@ import Model from "../components/Model";
 import { abbreviateNumber, capitalize } from "../utils/constants";
 import { addUser } from "../utils/userSlice";
 import { cacheResults } from "../utils/skillsSlice";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
 import { removeUser } from "../utils/userSlice";
 
 // import style manually
@@ -102,16 +102,56 @@ const Profile = () => {
 
   useEffect(() => { getRequestCount(); }, []);
 
+  // Update the change handler to ONLY update the input state
   const handleInputChange = (e) => {
-    const val = e.target.value;
-    setInputSkillQuery(val);
-    if (!val) return setSuggestions([]);
-    const filtered = skills?.filter(s =>
-      s?.toLowerCase().includes(val.trim().toLowerCase()) &&
-      !profileData?.skills?.includes(s)
-    );
-    setSuggestions(filtered || []);
+    setInputSkillQuery(e.target.value);
   };
+
+  // Create a useEffect to listen for typing and fetch from your backend
+  useEffect(() => {
+    // If the input is empty, clear suggestions and abort
+    if (!inputSkillQuery.trim()) {
+      setSuggestions([]);
+      return;
+    }
+
+    // Debounce the call slightly to prevent spamming the backend
+    const timer = setTimeout(async () => {
+      const queryLower = inputSkillQuery.toLowerCase();
+
+      // Check Redux Cache first
+      if (skillsCache[queryLower]) {
+        setSuggestions(skillsCache[queryLower]);
+        return;
+      }
+
+      try {
+        // CALL YOUR NEW ENDPOINT HERE!
+        const res = await axios.get(
+          import.meta.env.VITE_BackendURL + `/api/skills?query=${inputSkillQuery}&limit=10`,
+          { withCredentials: true }
+        );
+
+        if (res.data.success) {
+          // Filter out skills the user already has saved
+          const newSuggestions = res.data.skills.filter(
+            (s) => !profileData?.skills?.includes(s)
+          );
+
+          setSuggestions(newSuggestions);
+
+          // Update your Redux Cache so you don't fetch the same thing twice
+          dispatch(cacheResults({ [queryLower]: newSuggestions }));
+        }
+      } catch (err) {
+        console.error("Error fetching skills:", err);
+      }
+    }, 300); // 300ms debounce delay
+
+    return () => clearTimeout(timer); // Cleanup timer if user types fast
+  }, [inputSkillQuery, profileData?.skills, skillsCache, dispatch]);
+
+
 
   const handleSkillSelect = (skill) => {
     if (!skill || profileData?.skills?.includes(skill) || profileData?.skills?.length >= 15) return;
@@ -138,8 +178,8 @@ const Profile = () => {
       );
       if (res.data.success) {
         toast.success("Session Ended");
-        dispatch(removeUser()); 
-        navigate("/login");    
+        dispatch(removeUser());
+        navigate("/login");
       }
     } catch (err) {
       console.error("Logout failed", err);
@@ -290,6 +330,21 @@ const Profile = () => {
                   {isEditProfile && (
                     <div className="relative" ref={skillRef}>
                       <input type="text" placeholder="Add tech..." className="w-full rounded-xl border border-border bg-bg p-3 text-xs font-bold outline-none" value={inputSkillQuery} onChange={handleInputChange} />
+                      {suggestions.length > 0 && (
+                        <div className="absolute z-50 mt-2 w-full overflow-hidden rounded-xl border border-border bg-cardBg shadow-2xl">
+                          <ul className="max-h-48 overflow-y-auto p-2 no-scrollbar">
+                            {suggestions.map((skill) => (
+                              <li
+                                key={skill}
+                                className="cursor-pointer rounded-lg p-3 text-sm font-bold text-text hover:bg-primary/20 hover:text-primary transition-all"
+                                onClick={() => handleSkillSelect(skill)}
+                              >
+                                {skill}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
                   )}
                 </section>

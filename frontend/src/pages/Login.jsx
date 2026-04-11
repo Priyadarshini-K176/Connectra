@@ -1,9 +1,10 @@
+/* eslint-disable react/prop-types */
 import axios from "axios";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { FaUserCheck } from "react-icons/fa";
 import { useDispatch } from "react-redux";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import { toast } from "sonner";
 import { login } from "../utils/authSlice";
 import { clearConnectionRequests } from "../utils/connectionsSlice";
@@ -19,11 +20,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [isUsername, setIsUsername] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState({
-    email: "",
-    username: "",
-    password: "",
-  });
+  const [errors, setErrors] = useState({ email: "", username: "", password: "" });
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -32,186 +29,123 @@ const Login = () => {
 
   const validateInputs = () => {
     const newErrors = { email: "", username: "", password: "" };
-
-    if (!isUsername && userId.trim() === "") {
-      newErrors.email = "Email is required.";
-    } else if (!isUsername && !/^\S+@\S+\.\S+$/.test(userId)) {
-      newErrors.email = "Enter a valid email address.";
+    if (!isUsername && (userId.trim() === "" || !/^\S+@\S+\.\S+$/.test(userId))) {
+      newErrors.email = "Valid Email Required";
     }
-
     if (isUsername && userId.trim().length < 3) {
-      newErrors.username = "Username must be more than 3 characters long.";
+      newErrors.username = "Username too short";
     }
-
     if (password.trim().length <= 0) {
-      newErrors.password = "Enter A Password.";
+      newErrors.password = "Password Required";
     }
-
     setErrors(newErrors);
-
     return !Object.values(newErrors).some((error) => error !== "");
   };
 
   const handleLogin = async () => {
     if (!validateInputs()) return;
-
     try {
-      const data = isUsername
-        ? { username: userId, password }
-        : { email: userId, password };
-
-      const res = await axios.post(
-        import.meta.env.VITE_BackendURL + "/login",
-        data,
-        { withCredentials: true },
-      );
+      const data = isUsername ? { username: userId, password } : { email: userId, password };
+      const res = await axios.post(import.meta.env.VITE_BackendURL + "/login", data, { withCredentials: true });
 
       if (res.data.success === false) {
-        toast.error(res.data.message || "An error occurred");
+        toast.error(res.data.message || "Auth Failed");
       } else {
-        toast.success(res.data.message || "Logged In successful!");
+        toast.success("Welcome Back!");
         dispatch(addUser(res.data.user));
-        dispatch(clearInterestedRequests());
-        dispatch(clearConnectionRequests());
-        dispatch(clearFollowerRequests());
-        dispatch(clearFollowingRequests());
-        dispatch(clearIgnoredRequests());
-        dispatch(clearRejectedRequests());
-        dispatch(login());
-
-        return navigate(from, { replace: true });
+        [clearInterestedRequests, clearConnectionRequests, clearFollowerRequests, clearFollowingRequests, clearIgnoredRequests, clearRejectedRequests, login].forEach(fn => dispatch(fn()));
+        navigate(from, { replace: true });
       }
     } catch (err) {
-      if (err.response) {
-        toast.error(err.response.data.error || "Something went wrong!");
-      } else if (err.request) {
-        toast.error("No response from the server. Please try again.");
-      } else {
-        toast.error("An unexpected error occurred.");
-      }
-      console.error(err.message);
+      toast.error("Network Error");
     }
   };
 
   return (
-    <div className="flex min-h-fit justify-center">
-      <div className="flex-2 m-10 flex justify-center rounded-lg bg-bgSecondary shadow-md shadow-shadow">
-        <div className="min-w-[500px] p-6 sm:p-12">
-          <div className="flex flex-col items-center">
-            <h1 className="text-2xl font-extrabold xl:text-3xl">
+    <div className="flex min-h-screen items-center justify-center bg-[#f3f4f6] px-4 font-sans selection:bg-indigo-100">
+      <div className="w-full max-w-[480px] bg-white rounded-2xl shadow-xl border border-gray-100">
+        <div className="p-8 sm:p-12 text-center">
+
+          {/* Header to match your image */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold tracking-tight text-[#111827]">
               Welcome Back
             </h1>
-            <p className="mt-1 text-textMuted">
-              Login to continue your journey
+            <p className="text-sm text-gray-500 mt-2">
+              Start building and connecting
             </p>
-            <div className="mt-2 w-full flex-1">
-              <div className="mx-auto max-w-xs">
-                {errors.email && !isUsername && (
-                  <p className="mb-1 text-center text-xs text-error">
-                    {errors.email}
-                  </p>
-                )}
-                {errors.username && isUsername && (
-                  <p className="mb-1 text-center text-xs text-error">
-                    {errors.username}
-                  </p>
-                )}
-                {isUsername ? (
-                  <input
-                    className="md:text-md mb-3 w-full rounded-lg border-2 border-border px-8 py-4 font-medium text-black placeholder-gray-500 focus:border-gray-400 focus:bg-white focus:outline-none sm:text-sm lg:text-lg"
-                    type="text"
-                    placeholder="Username"
-                    value={userId}
-                    onChange={(e) => setUserId(e.target.value)}
-                  />
-                ) : (
-                  <input
-                    className="md:text-md mb-3 w-full rounded-lg border-2 border-border px-8 py-4 font-medium text-black placeholder-gray-500 focus:border-gray-400 focus:bg-white focus:outline-none sm:text-sm lg:text-lg"
-                    type="email"
-                    placeholder="Email"
-                    value={userId}
-                    onChange={(e) => setUserId(e.target.value)}
-                  />
-                )}
+          </div>
 
-                {errors.password && (
-                  <p className="mb-1 text-center text-xs text-error">
-                    {errors.password}
-                  </p>
-                )}
-                <div className="relative">
-                  <input
-                    className="md:text-md w-full rounded-lg border-2 border-border px-8 py-4 font-medium text-black placeholder-gray-500 focus:border-gray-400 focus:bg-white focus:outline-none sm:text-sm lg:text-lg"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => {
-                      setPassword(e.target.value);
-                    }}
-                  />
-                  <button
-                    type="button"
-                    className="absolute inset-y-0 right-3 flex items-center text-gray-500"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? <Eye /> : <EyeOff />}
-                  </button>
-                </div>
+          <div className="space-y-4">
+            {/* Input: Identifier (Email or Username) */}
+            <div className="text-left">
+              <input
+                className="w-full rounded-lg border border-gray-200 bg-white p-3.5 text-gray-900 outline-none transition-all focus:border-indigo-500 placeholder:text-gray-400"
+                type={isUsername ? "text" : "email"}
+                placeholder={isUsername ? "Username" : "Email"}
+                value={userId}
+                onChange={(e) => setUserId(e.target.value)}
+              />
+              {(errors.email || errors.username) && (
+                <p className="text-[11px] text-red-500 mt-1 ml-1">{isUsername ? errors.username : errors.email}</p>
+              )}
+            </div>
 
-                <p className="mt-2 text-right text-sm text-error hover:cursor-pointer">
-                  Forgot Password?
-                </p>
+            {/* Input: Password */}
+            <div className="text-left">
+              <div className="relative">
+                <input
+                  className="w-full rounded-lg border border-gray-200 bg-white p-3.5 text-gray-900 outline-none transition-all focus:border-indigo-500 placeholder:text-gray-400"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
                 <button
-                  className="focus:shadow-outline mt-3 flex w-full items-center justify-center rounded-lg bg-indigo-500 bg-primary py-4 font-semibold tracking-wide text-text transition-all duration-300 ease-in-out hover:bg-hover focus:outline-none"
-                  onClick={handleLogin}
+                  type="button"
+                  className="absolute inset-y-0 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+                  onClick={() => setShowPassword(!showPassword)}
                 >
-                  <FaUserCheck />
-                  <span className="ml-3">Login</span>
-                </button>
-                <p className="mt-6 text-center text-xs text-textMuted">
-                  I agree to abide by DevRoot&apos;s <br />
-                  <a
-                    href="#"
-                    className="border-b border-dotted border-border text-text"
-                  >
-                    Terms of Service
-                  </a>{" "}
-                  and its{" "}
-                  <a
-                    href="#"
-                    className="border-b border-dotted border-border text-text"
-                  >
-                    Privacy Policy
-                  </a>
-                </p>
-                <hr className="mt-4 border-[1.5px] border-textMuted" />
-              </div>
-              <div className="flex flex-col items-center">
-                <button
-                  className="focus:shadow-outline mt-5 flex w-full max-w-xs items-center justify-center rounded-lg bg-primary py-3 font-semibold text-text shadow-shadow transition-all duration-300 ease-in-out hover:bg-hover hover:shadow focus:shadow-sm focus:outline-none"
-                  onClick={() => {
-                    setIsUsername(!isUsername);
-                    setUserId("");
-                    setPassword("");
-                  }}
-                >
-                  <span className="ml-4">
-                    {`Sign Up with ${isUsername ? "Email" : "Username"}`}
-                  </span>
+                  {showPassword ? <EyeOff size={22} strokeWidth={1.5} /> : <Eye size={22} strokeWidth={1.5} />}
                 </button>
               </div>
+              {errors.password && <p className="text-[11px] text-red-500 mt-1 ml-1">{errors.password}</p>}
             </div>
-            <div className="my-2 text-center">
-              <div className="inline-block translate-y-1/2 transform px-2 pt-2 text-sm font-medium leading-none tracking-wide text-textMuted">
-                Don&apos;t have an account?{" "}
-                <a
-                  href="/signup"
-                  className="border-b border-dotted border-border text-text"
-                >
-                  Sign up
-                </a>
-              </div>
-            </div>
+
+            {/* Login Action */}
+            <button
+              className="w-full rounded-lg bg-[#4f46e5] py-3.5 text-sm font-bold text-white transition-all hover:bg-[#4338ca] active:scale-[0.99] mt-2 shadow-md shadow-indigo-100"
+              onClick={handleLogin}
+            >
+              Login
+            </button>
+
+            {/* Toggle Login Mode */}
+            <button
+              onClick={() => {
+                setIsUsername(!isUsername);
+                setUserId("");
+                setErrors({ email: "", username: "", password: "" });
+              }}
+              className="text-xs font-medium text-indigo-600 hover:text-indigo-800 transition-colors mt-2"
+            >
+              Login with {isUsername ? "Email" : "Username"} instead
+            </button>
+          </div>
+
+          {/* Footer to match your image */}
+          <div className="mt-8 pt-6 border-t border-gray-50 text-[13px]">
+            <p className="text-gray-500">
+              By logging in, you agree to our{" "}
+              <a href="#" className="text-gray-600 underline">Terms</a> and{" "}
+              <a href="#" className="text-gray-600 underline">Privacy Policy</a>
+            </p>
+            <p className="mt-4 text-gray-600">
+              Don't have an account?{" "}
+              <Link to="/signup" className="text-indigo-600 font-semibold hover:underline">
+                Sign up
+              </Link>
+            </p>
           </div>
         </div>
       </div>
