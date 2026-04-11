@@ -52,7 +52,11 @@ authRouter.post("/signup", async (req, res) => {
         await user.save();
 
         const token = user.getJWT();
-        res.cookie("token", token);
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: true,        // REQUIRED for cross-site cookies
+            sameSite: "none",    // REQUIRED for cross-site cookies
+        });
 
         await user.save();
         res.status(201)
@@ -109,9 +113,12 @@ authRouter.post("/logout", async (req, res) => {
     //expiring cookie to logout user
     res.cookie("token", "", {
         expires: new Date(0),
-        httpOnly: true, // Ensure it's not accessible via JavaScript
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
         path: "/",
     });
+
     res.status(200).json({ success: true, message: "Logged Out Successfully" });
 });
 
@@ -139,46 +146,46 @@ authRouter.patch("/forgotPassword", async (req, res) => {
 
             await user.save();
             res.status(200).json({ message: "Password Has Been changed" });
-        }else{
-            throw new Error ("Password is not strong");
+        } else {
+            throw new Error("Password is not strong");
         }
-    }catch(err){
+    } catch (err) {
         console.log(err);
-        res.status(500).json({error:err.message});
+        res.status(500).json({ error: err.message });
     }
 });
 
 //* To change password when login
 authRouter.patch("/changePassword", userAuth, async (req, res) => {
-  try {
-    //* storing logged user data to loggedInUser
-    const loggedInUser = req.user;
-    if (!loggedInUser) {
-      return res
-        .status(401)
-        .json({ error: "Unauthorized. Please login again." });
-    }
-    const { password, newPassword } = req.body;
+    try {
+        //* storing logged user data to loggedInUser
+        const loggedInUser = req.user;
+        if (!loggedInUser) {
+            return res
+                .status(401)
+                .json({ error: "Unauthorized. Please login again." });
+        }
+        const { password, newPassword } = req.body;
 
-    //* Adding password to user document
-    if (validator.isStrongPassword(newPassword)) {
-      const isPasswordValid = await loggedInUser.validatePassword(password);
-      if (isPasswordValid) {
-        const passwordHash = await bcrypt.hash(newPassword, 10);
-        loggedInUser.password = passwordHash;
-        await loggedInUser.save();
-        res.status(200).json({ message: "Password Has Been changed" });
-      } else {
-        throw new Error("Password is incorrect");
-      }
-    } else {
-      throw new Error("Password is not strong");
-    }
-  } catch (err) {
+        //* Adding password to user document
+        if (validator.isStrongPassword(newPassword)) {
+            const isPasswordValid = await loggedInUser.validatePassword(password);
+            if (isPasswordValid) {
+                const passwordHash = await bcrypt.hash(newPassword, 10);
+                loggedInUser.password = passwordHash;
+                await loggedInUser.save();
+                res.status(200).json({ message: "Password Has Been changed" });
+            } else {
+                throw new Error("Password is incorrect");
+            }
+        } else {
+            throw new Error("Password is not strong");
+        }
+    } catch (err) {
 
-    console.log(err);
-    res.status(500).json({ error: err.message });
-  }
+        console.log(err);
+        res.status(500).json({ error: err.message });
+    }
 });
 
 module.exports = authRouter;
