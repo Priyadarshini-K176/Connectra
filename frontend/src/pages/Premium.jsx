@@ -37,7 +37,7 @@ const PremiumUserView = () => {
         You are a Premium Member
       </h1>
       <p className="mb-8 max-w-md text-slate-600">
-        Thank you for your support. You now have full access to all Connectra features,
+        Thank you for your support. You now have full access to all Connectra features, 
         including advanced search and unlimited connection requests.
       </p>
       <div className="flex gap-4">
@@ -101,7 +101,7 @@ const PricingCard = ({
         description: "Premium Membership",
         order_id: orderId,
         prefill: {
-          name: notes.firstName + " " + notes.lastName,
+          name: notes.firstName + " " + notes.LastName,
           email: notes.email,
         },
         theme: { color: "#2563eb" },
@@ -140,10 +140,11 @@ const PricingCard = ({
       <button
         onClick={() => handlePayment(membershipType)}
         disabled={isProcessing}
-        className={`mt-auto rounded-lg py-3 font-bold transition-all ${isPopular
-          ? "bg-blue-600 text-white hover:bg-blue-700"
+        className={`mt-auto rounded-lg py-3 font-bold transition-all ${
+          isPopular 
+          ? "bg-blue-600 text-white hover:bg-blue-700" 
           : "bg-slate-900 text-white hover:bg-slate-800"
-          } flex items-center justify-center disabled:opacity-50`}
+        } flex items-center justify-center disabled:opacity-50`}
       >
         {isProcessing ? <FaSpinner className="animate-spin" /> : "Choose Plan"}
       </button>

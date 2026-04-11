@@ -54,7 +54,6 @@ profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
     res.status(200).json({
       success: true,
       message: `${loggedInUser.firstName}, your profile has been updated`,
-      user: loggedInUser
     });
 
   } catch (err) {
@@ -242,16 +241,18 @@ profileRouter.patch(
         : [];
       if (adminEmails.includes(user.email)) {
         return res.status(400).json({
-          error: `Role of ${user.firstName[0].toUpperCase() + user.firstName.slice(1)
-            } could not be update.`,
+          error: `Role of ${
+            user.firstName[0].toUpperCase() + user.firstName.slice(1)
+          } could not be update.`,
         });
       }
 
       //* if role is same as previous role
       if (user.role === role) {
         return res.status(400).json({
-          error: `${user.firstName[0].toUpperCase() + user.firstName.slice(1)
-            } already have ${role} role`,
+          error: `${
+            user.firstName[0].toUpperCase() + user.firstName.slice(1)
+          } already have ${role} role`,
         });
       }
 
@@ -260,8 +261,9 @@ profileRouter.patch(
       await user.save();
 
       res.status(200).json({
-        message: `Role of ${user.firstName[0].toUpperCase() + user.firstName.slice(1)
-          } is updated to ${role}`,
+        message: `Role of ${
+          user.firstName[0].toUpperCase() + user.firstName.slice(1)
+        } is updated to ${role}`,
       });
     } catch (err) {
       console.log(err);
@@ -297,8 +299,8 @@ profileRouter.get(
         parseInt(req.query.limit) > 50
           ? 50
           : parseInt(req.query.limit) < 1
-            ? 1
-            : parseInt(req.query.limit) || 10;
+          ? 1
+          : parseInt(req.query.limit) || 10;
 
       const list = await User.find({ role: role })
         .select(process.env.ALLOWED_FIELDS.split(","))
@@ -501,8 +503,9 @@ profileRouter.patch(
         : [];
       if (adminEmails.includes(user.email)) {
         return res.status(400).json({
-          error: `Role of ${user.firstName[0].toUpperCase() + user.firstName.slice(1)
-            } could not be update.`,
+          error: `Role of ${
+            user.firstName[0].toUpperCase() + user.firstName.slice(1)
+          } could not be update.`,
         });
       }
 
@@ -515,8 +518,9 @@ profileRouter.patch(
       //* checking if new role is same as previous
       if (user.role === role) {
         return res.status(400).json({
-          message: `${user.firstName[0].toUpperCase() + user.firstName.slice(1)
-            } already have ${role} role`,
+          message: `${
+            user.firstName[0].toUpperCase() + user.firstName.slice(1)
+          } already have ${role} role`,
         });
       }
 
@@ -525,8 +529,9 @@ profileRouter.patch(
       await user.save();
 
       res.status(200).json({
-        message: `Role of ${user.firstName[0].toUpperCase() + user.firstName.slice(1)
-          } is updated to ${role}`,
+        message: `Role of ${
+          user.firstName[0].toUpperCase() + user.firstName.slice(1)
+        } is updated to ${role}`,
       });
     } catch (err) {
       console.log(err);
@@ -565,8 +570,8 @@ profileRouter.get(
         parseInt(req.query.limit) > 50
           ? 50
           : parseInt(req.query.limit) < 1
-            ? 1
-            : parseInt(req.query.limit) || 10;
+          ? 1
+          : parseInt(req.query.limit) || 10;
 
       const list = await User.find({ role: role })
         .select(process.env.ALLOWED_FIELDS.split(","))
@@ -654,8 +659,8 @@ profileRouter.get(
         parseInt(req.query.limit) > 50
           ? 50
           : parseInt(req.query.limit) < 1
-            ? 1
-            : parseInt(req.query.limit) || 10;
+          ? 1
+          : parseInt(req.query.limit) || 10;
 
       // Determine sorting order (default to descending by createdAt)
       const sortBy = req.query.sortBy || "createdAt";

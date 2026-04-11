@@ -35,8 +35,6 @@ import UserProfile from "./pages/UserProfile";
 import AdminRoute from "./utils/AdminRoutes";
 import ProtectedRoute from "./utils/ProtectedRoute";
 import { addUser, removeUser } from "./utils/userSlice";
-import Recommendations from "./components/networks/Recommendations";
-
 
 const App = () => {
   const dispatch = useDispatch();
@@ -92,7 +90,6 @@ const App = () => {
                 <Route path="/networks/connections" element={<Connections />} />
                 <Route path="/networks/ignored" element={<Ignored />} />
                 <Route path="/networks/rejected" element={<Rejected />} />
-                <Route path="/networks/recommendations" element={<Recommendations />} />
               </Route>
               <Route path="/profile" element={<Profile />} />
               <Route path="/profile/:userId" element={<UserProfile />} />

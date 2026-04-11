@@ -24,8 +24,6 @@ app.use("/", require("./routes/userConnection"));
 app.use("/", require("./routes/search"));
 app.use("/", require("./routes/payment"));
 app.use("/", require("./routes/chat"));
-app.use("/", require("./routes/skills"));
-app.use("/", require("./routes/recommendation"));
 
 // ✅ Health check
 app.get("/", (req, res) => {

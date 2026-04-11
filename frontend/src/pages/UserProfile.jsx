@@ -91,24 +91,6 @@ const UserProfile = () => {
     }
   };
 
-  const sendRequest = async (status) => {
-    try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_BackendURL}/request/send/${status}/${profileData._id}`,
-        {},
-        { withCredentials: true }
-      );
-
-      if (res.data.success) {
-        toast.success(res.data.message || "Request sent successfully!");
-        userConnection(); // Refresh the connection status on UI
-        setShowConnection(false); // Close dropdown
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.error || "Failed to send request");
-    }
-  };
-
   useEffect(() => {
     if (user?.username === userId) {
       return navigate("/profile");
@@ -216,11 +198,11 @@ const UserProfile = () => {
                         onClick={() => setShowConnection(!showConnection)}
                       />
                       {showConnection && (
-                        <div className="absolute right-0 top-10 flex flex-col rounded-lg bg-white shadow-md z-50">
-                          <button onClick={() => sendRequest("interested")} className="px-4 py-2 hover:bg-gray-100 transition-colors cursor-pointer">
+                        <div className="absolute right-0 top-10 flex flex-col rounded-lg bg-white shadow-md">
+                          <button className="px-4 py-2 hover:bg-gray-100">
                             Interested ?
                           </button>
-                          <button onClick={() => sendRequest("ignored")} className="px-4 py-2 hover:bg-gray-100 transition-colors text-red-500 cursor-pointer">
+                          <button className="px-4 py-2 hover:bg-gray-100">
                             Ignore User
                           </button>
                         </div>
