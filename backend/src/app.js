@@ -9,7 +9,7 @@ const app = express();
 // ✅ Middleware
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:5174", "https://connectra-rfzppk0f2-priyas-projects-dd82cdd4.vercel.app"],
+    origin: ["http://localhost:5173", "http://localhost:5174", "https://connectra-rose.vercel.app/"],
     credentials: true,
   })
 );
