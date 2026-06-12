@@ -5,7 +5,7 @@ const ENCRYPTION_KEY = crypto
   .update(String(process.env.CHAT_ENCRYPTION_KEY || "default_secret_key_placeholder"))
   .digest(); //32 bytes for AES-256
 
-  const IV_LENGTH=16; //AES BLOCK
+ const IV_LENGTH=16; //AES BLOCK
 
 function encrypt(text){
     if (!text) return "";

@@ -54,8 +54,8 @@ authRouter.post("/signup", async (req, res) => {
         const token = user.getJWT();
         res.cookie("token", token, {
             httpOnly: true,
-            secure: true,        // REQUIRED for cross-site cookies
-            sameSite: "none",    // REQUIRED for cross-site cookies
+            secure: false,        // REQUIRED for cross-site cookies
+            sameSite: "lax",    // REQUIRED for cross-site cookies
         });
 
         await user.save();
@@ -96,8 +96,8 @@ authRouter.post("/login", async (req, res) => {
             //* adding the token to cookie and send back to user
             res.cookie("token", token, {
                 httpOnly: true,
-                secure: true,      // ⚠️ use false in local dev
-                sameSite: "none",  // required for cross-origin
+                secure: false,      // ⚠️ use false in local dev
+                sameSite: "lax",  // required for cross-origin
             });
             res
                 .status(200)
@@ -118,8 +118,8 @@ authRouter.post("/logout", async (req, res) => {
     res.cookie("token", "", {
         expires: new Date(0),
         httpOnly: true,
-        secure: true,
-        sameSite: "none",
+        secure: false,
+        sameSite: "lax",
         path: "/",
     });
 

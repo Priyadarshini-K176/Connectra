@@ -7,8 +7,6 @@ const { userRole } = require("../middlewares/role");
 const requestRouter = express.Router();
 
 
-
-
 //* To send interested or ignored request to user profile
 requestRouter.post(
   "/request/send/:status/:toUserId",
@@ -56,6 +54,20 @@ requestRouter.post(
           .json({ success: false, error: `invalid status type ${status}` });
       }
 
+      if (status === "interested" && !loggedInUser.isPremium) {
+        const requestCount = await ConnectionRequest.countDocuments({
+          fromUserId: loggedInUser._id,
+          status: "interested",
+        });
+        if (requestCount >= 10) {
+          return res.status(403).json({
+            success: false,
+            error: "Free limit reached! Upgrade to Premium to send unlimited connection requests.",
+          });
+        }
+      }
+
+
       //* checking if there is existing connectionRequest
       const existingConnectionRequest = await ConnectionRequest.findOne({
         $or: [
@@ -84,18 +96,18 @@ requestRouter.post(
         const fromUsername = loggedInUser.username;
         const toUser = isToUserExist.firstName || "Dev";
         const toAddress = isToUserExist.email;
-        const subject = "🔥 New Interest on DevRoot!";
+        const subject = "🔥 New Interest on Connectra!";
 
-       /* const htmlTemplate = InterestedMailTemplate(
-          fromUser,
-          fromUsername,
-          toUser
-        );
-        
-
-        const emailRes = await sendEmail.run(toAddress, subject, htmlTemplate);
-        console.log("Email Sent:", emailRes);
-        */
+        /* const htmlTemplate = InterestedMailTemplate(
+           fromUser,
+           fromUsername,
+           toUser
+         );
+         
+ 
+         const emailRes = await sendEmail.run(toAddress, subject, htmlTemplate);
+         console.log("Email Sent:", emailRes);
+         */
 
         return res
           .status(200)
@@ -127,8 +139,8 @@ requestRouter.get("/request/send", userAuth, async (req, res) => {
       parseInt(req.query.limit) > 50
         ? 50
         : parseInt(req.query.limit) < 1
-        ? 1
-        : parseInt(req.query.limit) || 10;
+          ? 1
+          : parseInt(req.query.limit) || 10;
     //* finding all the connection with interested status send form logged in user
     const totalRequests = await ConnectionRequest.countDocuments({
       $or: [
@@ -234,6 +246,7 @@ requestRouter.get("/request/received", userAuth, async (req, res) => {
   }
 });
 
+//connection requests between loggedInUser and  specific user
 requestRouter.get("/request/followers/:userId", userAuth, async (req, res) => {
   try {
     const loggedInUser = req.user;
@@ -291,6 +304,8 @@ requestRouter.get("/request/followers/:userId", userAuth, async (req, res) => {
   }
 });
 
+
+//Get all incoming requests and accepted connections
 requestRouter.get("/request/followers", userAuth, async (req, res) => {
   try {
     const loggedInUser = req.user;
@@ -340,7 +355,7 @@ requestRouter.get("/request/followers", userAuth, async (req, res) => {
         },
       ],
     })
-      .sort({ updatedAt: -1 }) // Sort by time (most recent first)
+      .sort({ updatedAt: -1 }) 
       .populate("fromUserId toUserId", process.env.ALLOWED_FIELDS.split(","))
       .skip((page - 1) * limit)
       .limit(limit);
@@ -374,17 +389,16 @@ requestRouter.get("/request/accepted", userAuth, async (req, res) => {
         .json({ success: false, error: "Unauthorized. Please login again." });
     }
 
-    // Get pagination parameters with validation
     const page = Math.max(1, parseInt(req.query.page) || 1);
     const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 10));
 
-    // Fetch total count of matching requests for pagination
+   
     const totalRequests = await ConnectionRequest.countDocuments({
       $or: [{ fromUserId: loggedInUser }, { toUserId: loggedInUser }],
       status: "accepted",
     });
 
-    // Fetch paginated and sorted data
+   
     const connections = await ConnectionRequest.find({
       $or: [{ fromUserId: loggedInUser }, { toUserId: loggedInUser }],
       status: "accepted",
@@ -394,7 +408,7 @@ requestRouter.get("/request/accepted", userAuth, async (req, res) => {
       .skip((page - 1) * limit)
       .limit(limit);
 
-    // Respond with the fetched data and pagination info
+  
     res.status(200).json({
       success: true,
       message: "Requests fetched successfully",
@@ -476,9 +490,10 @@ requestRouter.get("/request/ignored", userAuth, async (req, res) => {
       parseInt(req.query.limit) > 50
         ? 50
         : parseInt(req.query.limit) < 1
-        ? 1
-        : parseInt(req.query.limit) || 10;
-    //* finding all the connection with ignored status send form logged in user
+          ? 1
+          : parseInt(req.query.limit) || 10;
+    
+
     const totalRequests = await ConnectionRequest.countDocuments({
       fromUserId: loggedInUser._id,
       status: "ignored",
@@ -577,6 +592,7 @@ requestRouter.delete(
   }
 );
 
+//delete a connection request 
 requestRouter.delete(
   "/request/review/:status/:requestId",
   userAuth,
@@ -938,8 +954,8 @@ requestRouter.get("/request/connections", userAuth, async (req, res) => {
       parseInt(req.query.limit) > 50
         ? 50
         : parseInt(req.query.limit) < 1
-        ? 1
-        : parseInt(req.query.limit) || 10;
+          ? 1
+          : parseInt(req.query.limit) || 10;
 
     //* finding all the connections
     const totalRequests = await ConnectionRequest.countDocuments({
@@ -1154,6 +1170,7 @@ requestRouter.get(
           current: requestCount,
           last: lastRequestCount,
           percentageChange: percentageChange,
+          changeSymbol,
         },
       });
     } catch (err) {
@@ -1193,8 +1210,8 @@ requestRouter.get(
         parseInt(req.query.limit) > 50
           ? 50
           : parseInt(req.query.limit) < 1
-          ? 1
-          : parseInt(req.query.limit) || 10;
+            ? 1
+            : parseInt(req.query.limit) || 10;
       //* finding all the connection with status
       let requests;
       if (status === "all")
@@ -1257,8 +1274,8 @@ requestRouter.get(
         parseInt(req.query.limit) > 50
           ? 50
           : parseInt(req.query.limit) < 1
-          ? 1
-          : parseInt(req.query.limit) || 10;
+            ? 1
+            : parseInt(req.query.limit) || 10;
 
       //* finding all the connection with status
       const userRequests = await ConnectionRequest.find({

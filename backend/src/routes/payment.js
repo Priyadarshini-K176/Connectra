@@ -1,5 +1,6 @@
 const express = require("express");
 const paymentRoute = express.Router();
+const crypto = require("crypto");
 const { userAuth } = require("../middlewares/auth");
 
 const razorpayInstance = require("../utils/razorpay");
@@ -165,24 +166,58 @@ paymentRoute.post("/payment/webhook", async (req, res) => {
   }
 });
 
+
 paymentRoute.get("/payment/verify", userAuth, async (req, res) => {
   try {
-    const user = req.user;
-    if (user.isPremium) {
-      return res.status(200).json({
-        success: true,
-        message: "user is Premium",
-        isPremium: true,
-      });
-    }
     return res.status(200).json({
       success: true,
-      message: "user is not Premium",
-      isPremium: false,
+      isPremium: req.user.isPremium || false,
     });
   } catch (err) {
     return res.status(500).json({ success: false, error: err.message });
   }
 });
+
+paymentRoute.post("/payment/verify", userAuth, async (req, res) => {
+  try {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+    // 1. Validate the signature
+    const body = razorpay_order_id + "|" + razorpay_payment_id;
+    const expectedSignature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+      .update(body.toString())
+      .digest("hex");
+    const isSignatureValid = expectedSignature === razorpay_signature;
+    if (!isSignatureValid) {
+      return res.status(400).json({ success: false, error: "Invalid signature" });
+    }
+    // 2. Update the Payment status in DB
+    const payment = await Payment.findOne({ orderId: razorpay_order_id });
+    if (payment) {
+      payment.status = "captured"; // Mark as paid
+      await payment.save();
+    }
+    // 3. Update the User to Premium immediately
+    const user = req.user;
+    user.isPremium = true;
+
+    // Get plan from payment notes
+    if (payment && payment.notes && payment.notes.plan) {
+      const plan = payment.notes.plan;
+      // If it's an array, take the first element; otherwise, use it as is.
+      user.membershipType = Array.isArray(plan) ? plan[0] : plan;
+    }
+    await user.save();
+    return res.status(200).json({
+      success: true,
+      message: "Payment verified successfully!",
+      isPremium: true
+    });
+  } catch (err) {
+    console.error("Verification Error:", err);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 
 module.exports = paymentRoute;

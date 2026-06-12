@@ -410,7 +410,8 @@ userRouter.get(
         stats: {
           current: userCount,
           last: lastUserCount,
-          percentageChange: percentageChange       
+          percentageChange: percentageChange,
+          changeSymbol 
           },
       });
     } catch (err) {

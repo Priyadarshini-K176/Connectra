@@ -346,12 +346,11 @@ profileRouter.patch(
 
       const user = await User.findById(userId);
 
-      //* Ensure `status` is valid
+      
       if (!["active", "deactivated", "banned"].includes(status)) {
         return res.status(400).json({ error: "Invalid status." });
       }
 
-      //* Handle status change logic
       if (user.status === status) {
         return res
           .status(200)

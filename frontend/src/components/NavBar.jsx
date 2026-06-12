@@ -35,7 +35,7 @@ const NavBar = () => {
   });
   const [showNavbar, setShowNavbar] = useState(false);
   const menuRef = useRef(null);
-  const [showProfileMenu1, setShowProfileMenu1] = useState(false);
+ 
   const [showProfileMenu2, setShowProfileMenu2] = useState(false);
   const profileRef1 = useRef(null);
   const profileRef2 = useRef(null);
@@ -99,7 +99,6 @@ const NavBar = () => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (profileRef1.current && !profileRef1.current.contains(event.target)) setShowProfileMenu1(false);
       if (profileRef2.current && !profileRef2.current.contains(event.target)) setShowProfileMenu2(false);
       if (menuRef.current && !menuRef.current.contains(event.target)) setShowNavbar(false);
     };
@@ -114,6 +113,7 @@ const NavBar = () => {
         { withCredentials: true },
       );
       setSearch(res.data.result);
+      setSearchSuggestions(res.data.result);
       dispatch(cacheResults({ [query]: res.data.result }));
     } catch (err) {
       console.error(err.message);

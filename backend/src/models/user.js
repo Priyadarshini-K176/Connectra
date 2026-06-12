@@ -142,6 +142,29 @@ const userSchema=new Schema({
 userSchema.index({firstName:1,lastName:1});
 userSchema.index({skills:1});
 
+// Text index for search functionality (supports $text queries)
+userSchema.index(
+  {
+    username: "text",
+    firstName: "text",
+    lastName: "text",
+    skills: "text",
+    headline: "text",
+    about: "text",
+  },
+  {
+    name: "user_text_search_idx",
+    weights: {
+      username: 10,
+      firstName: 8,
+      lastName: 8,
+      skills: 6,
+      headline: 4,
+      about: 2,
+    },
+  }
+);
+
 userSchema.methods.getJWT=function(){
     //create jwt
     const token=jwt.sign(

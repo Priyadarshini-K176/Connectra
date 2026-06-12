@@ -13,6 +13,14 @@ searchRouter.get("/search", userAuth, async (req, res) => {
         .json({ error: "Unauthorized. Please login again." });
     }
 
+    // Safe env var with fallback
+    const allowedFieldsStr = process.env.ALLOWED_FIELDS || "username,firstName,lastName,skills,headline,avatar";
+    let searchFields = allowedFieldsStr.split(",").map(f => f.trim());
+
+    if (!loggedInUser.isPremium) {
+      searchFields = searchFields.filter(field => field !== "email" && field !== "about");
+    }
+
     const { query } = req.query;
     if (!query) {
       return res.status(400).json({ error: "Query parameter is required." });
@@ -24,18 +32,23 @@ searchRouter.get("/search", userAuth, async (req, res) => {
     let result = [];
     let resultCount = 0;
 
-    // 🔹 Step 1: Try Full-Text Search (Requires Index)
+    // 🔹 Step 1: Try Full-Text Search (gracefully fallback if index missing)
     if (query.length > 2) {
-      // Text search works best with longer queries
-      result = await User.find({ $text: { $search: query } })
-        .select(process.env.ALLOWED_FIELDS.split(","))
-        .skip((page - 1) * limit)
-        .limit(limit);
+      try {
+        result = await User.find({ $text: { $search: query } }, { score: { $meta: "textScore" } })
+          .sort( { score: { $meta: "textScore" } } )
+          .select(searchFields)
+          .skip((page - 1) * limit)
+          .limit(limit);
 
-      resultCount = await User.countDocuments({ $text: { $search: query } });
+        resultCount = await User.countDocuments({ $text: { $search: query } });
+      } catch (textSearchError) {
+        // Text index might not exist yet; fall through to regex
+        console.warn("Text search failed, falling back to regex:", textSearchError.message);
+      }
     }
 
-    // 🔹 Step 2: Fallback to Regex if No Results Found
+    // 🔹 Step 2: Fallback to Regex if No Text Results or Text Search Failed
     if (result.length === 0) {
       const regexQuery = {
         $or: [
@@ -49,7 +62,7 @@ searchRouter.get("/search", userAuth, async (req, res) => {
       };
 
       result = await User.find(regexQuery)
-        .select(process.env.ALLOWED_FIELDS.split(","))
+        .select(searchFields)
         .skip((page - 1) * limit)
         .limit(limit);
 
@@ -59,6 +72,7 @@ searchRouter.get("/search", userAuth, async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Search successful",
+      isPremiumUser: loggedInUser.isPremium,
       result,
       pagination: {
         currentPage: Number(page),
@@ -67,6 +81,7 @@ searchRouter.get("/search", userAuth, async (req, res) => {
       },
     });
   } catch (err) {
+    console.error("Search route error:", err);
     res.status(500).json({ success: false, error: err.message });
   }
 });

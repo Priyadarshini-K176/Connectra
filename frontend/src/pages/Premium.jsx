@@ -4,6 +4,7 @@ import { FaCrown, FaSpinner, FaCheck } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
 import { addUser, removeUser } from "../utils/userSlice";
+import { Link } from "react-router-dom";
 
 const PremiumUserView = () => {
   const dispatch = useDispatch();
@@ -41,12 +42,12 @@ const PremiumUserView = () => {
         including advanced search and unlimited connection requests.
       </p>
       <div className="flex gap-4">
-        <button className="rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700 transition-colors">
+        <Link to="/feed" className="rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700 transition-colors">
           Explore Features
-        </button>
-        <button className="rounded-lg border border-slate-200 px-6 py-3 font-semibold text-slate-700 hover:bg-slate-50 transition-colors">
+        </Link>
+        <Link to="/profile" className="rounded-lg border border-slate-200 px-6 py-3 font-semibold text-slate-700 hover:bg-slate-50 transition-colors">
           Billing Settings
-        </button>
+        </Link>
       </div>
     </div>
   );
@@ -61,10 +62,16 @@ const PricingCard = ({
 }) => {
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const verifyPremiumUser = async () => {
+  const verifyPremiumUser = async (paymentResponse) => {
     try {
-      const res = await axios.get(
+      // Send the payment details to the backend for verification
+      const res = await axios.post(
         `${import.meta.env.VITE_BackendURL}/payment/verify`,
+        {
+          razorpay_order_id: paymentResponse.razorpay_order_id,
+          razorpay_payment_id: paymentResponse.razorpay_payment_id,
+          razorpay_signature: paymentResponse.razorpay_signature,
+        },
         { withCredentials: true }
       );
       if (res.data.isPremium === true) {
@@ -72,9 +79,12 @@ const PricingCard = ({
         toast.success("Premium activated!");
       }
     } catch (err) {
-      toast.error("Verification failed");
+      toast.error("Verification failed: " + (err.response?.data?.error || err.message));
+    } finally {
+      setIsProcessing(false);
     }
   };
+
 
   const handlePayment = async (membershipType) => {
     setIsProcessing(true);
@@ -105,7 +115,7 @@ const PricingCard = ({
           email: notes.email,
         },
         theme: { color: "#2563eb" },
-        handler: () => verifyPremiumUser(),
+        handler: (response) => verifyPremiumUser(response),
         modal: { ondismiss: () => setIsProcessing(false) },
       };
 

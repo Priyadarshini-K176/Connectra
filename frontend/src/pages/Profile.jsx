@@ -107,46 +107,39 @@ const Profile = () => {
     setInputSkillQuery(e.target.value);
   };
 
-  // Create a useEffect to listen for typing and fetch from your backend
   useEffect(() => {
-    // If the input is empty, clear suggestions and abort
     if (!inputSkillQuery.trim()) {
       setSuggestions([]);
       return;
     }
 
-    // Debounce the call slightly to prevent spamming the backend
     const timer = setTimeout(async () => {
       const queryLower = inputSkillQuery.toLowerCase();
 
-      // Check Redux Cache first
       if (skillsCache[queryLower]) {
         setSuggestions(skillsCache[queryLower]);
         return;
       }
 
       try {
-        // CALL YOUR NEW ENDPOINT HERE!
         const res = await axios.get(
           import.meta.env.VITE_BackendURL + `/api/skills?query=${inputSkillQuery}&limit=10`,
           { withCredentials: true }
         );
 
         if (res.data.success) {
-          // Filter out skills the user already has saved
           const newSuggestions = res.data.skills.filter(
             (s) => !profileData?.skills?.includes(s)
           );
 
           setSuggestions(newSuggestions);
 
-          // Update your Redux Cache so you don't fetch the same thing twice
           dispatch(cacheResults({ [queryLower]: newSuggestions }));
         }
       } catch (err) {
         console.error("Error fetching skills:", err);
       }
-    }, 300); // 300ms debounce delay
+    }, 300); 
 
     return () => clearTimeout(timer); // Cleanup timer if user types fast
   }, [inputSkillQuery, profileData?.skills, skillsCache, dispatch]);
