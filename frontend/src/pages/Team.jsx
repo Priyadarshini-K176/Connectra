@@ -5,7 +5,7 @@ const teamMembers = [
   {
     name: "Priya",
     role: " Web Developer",
-    image: "https://avatars.githubusercontent.com/u/121187728?v=4",
+    image: "https://img.freepik.com/premium-vector/developer-female-vector-icon-can-be-used-no-code-iconset_717774-150959.jpg",
     description:
       "I’m a begginer full-stack developer skilled in React, Node.js, and MongoDB. I specialize in building scalable web applications with a focus on performance and user experience. I love exploring new technologies and solving real-world problems. ",
   },
@@ -21,8 +21,7 @@ const Team = () => {
         Meet Our Team
       </h2>
       <p className="mx-auto max-w-2xl text-gray-500 leading-relaxed">
-        The mind behind DevRoot – a passionate solo developer with
-        engineering and design skills, building a growing tech community 🚀
+        The mind behind Connectra – a passionate solo developer , always passionate about learning new technologies 🚀
       </p>
     </div>
 
